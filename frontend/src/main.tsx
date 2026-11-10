@@ -30,21 +30,35 @@ const currentUser = () => ({
 });
 
 async function api(path: string, method = 'GET', body?: unknown) {
-  const r = await fetch(API_BASE + path, {
-    method,
-    headers: {
-      'content-type': 'application/json',
-      authorization: 'Bearer ' + tok(),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const j = await r.json().catch(() => ({}));
-  if (r.status === 401 && !path.startsWith('/auth')) {
-    localStorage.clear();
-    location.href = '/login';
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout for cold starts
+
+  try {
+    const r = await fetch(API_BASE + path, {
+      method,
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer ' + tok(),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401 && !path.startsWith('/auth')) {
+      localStorage.clear();
+      location.href = '/login';
+    }
+    if (!r.ok) throw new Error(j.error || `Request failed (${r.status})`);
+    return j;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Server cold-start delay (~30s). Please wait 10 seconds and try again!');
+    }
+    throw err;
   }
-  if (!r.ok) throw new Error(j.error || 'Request failed');
-  return j;
 }
 
 const Guard = ({ children }: { children: React.ReactNode }) => {

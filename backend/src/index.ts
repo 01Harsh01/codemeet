@@ -1204,4 +1204,24 @@ server.on('upgrade', async (req, socket, head) => {
   }
 });
 
-server.listen(PORT, () => console.log(`[Backend] Server listening on port ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Backend] Server listening on 0.0.0.0:${PORT}`);
+
+  // Connect to database and sync schema in background without blocking port binding
+  prisma.$connect()
+    .then(() => {
+      console.log('[Database] Database connection verified.');
+      import('child_process').then(({ exec }) => {
+        exec('npx prisma db push --skip-generate', (err, stdout, stderr) => {
+          if (err) {
+            console.warn('[Database Sync] Schema sync notice:', stderr || err.message);
+          } else {
+            console.log('[Database Sync] Prisma schema pushed successfully.');
+          }
+        });
+      });
+    })
+    .catch((err) => {
+      console.error('[Database] Connection notice:', err.message);
+    });
+});
