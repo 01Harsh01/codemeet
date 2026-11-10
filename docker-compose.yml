@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: codemeet, POSTGRES_PASSWORD: "${DB_PASSWORD}", POSTGRES_DB: codemeet }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL","pg_isready -U codemeet"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+  executor:
+    build: ./executor
+    environment: { EXECUTOR_SECRET: "${EXECUTOR_SECRET}", RUN_DIR: /tmp/codemeet-runs }
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock", "/tmp/codemeet-runs:/tmp/codemeet-runs"]
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://codemeet:${DB_PASSWORD}@postgres:5432/codemeet
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      EXECUTOR_URL: http://executor:4001
+      EXECUTOR_SECRET: ${EXECUTOR_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_started } }
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:4000/health"], interval: 10s }
+  frontend:
+    build: ./frontend
+    ports: ["80:80"]
+    depends_on: [backend]
+volumes: { pgdata: {} }

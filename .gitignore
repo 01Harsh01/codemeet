@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+
+# Production / build artifacts
+dist/
+*/dist/
+build/
+*/build/
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+!.env.example
+
+# Local SQLite databases & migrations
+*.db
+*.db-journal
+*.sqlite
+dev.db
+backend/dev.db
+backend/prisma/dev.db
+
+# Logs & execution cache
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

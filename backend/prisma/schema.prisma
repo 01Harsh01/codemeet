@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(cuid())
+  email           String            @unique
+  name            String
+  passwordHash    String
+  avatarUrl       String?
+  githubToken     String?
+  githubUsername  String?
+  createdAt       DateTime          @default(now())
+  rooms           Room[]
+  memberships     RoomParticipant[]
+  messages        Message[]
+  notifications   Notification[]
+  codeComments    CodeComment[]
+  contestEntries  ContestSubmission[]
+}
+
+model Room {
+  id             String            @id
+  name           String
+  isPublic       Boolean           @default(false)
+  language       String            @default("python")
+  hostId         String
+  problemId      String?
+  problemData    String?
+  sessionType    String            @default("COLLAB") // COLLAB, INTERVIEW, CONTEST
+  status         String            @default("ACTIVE") // ACTIVE, COMPLETED
+  isLocked       Boolean           @default(false)    // lock editing permissions
+  whiteboardData String?
+  notes          String?
+  recordingConsent Boolean         @default(false)
+  host           User              @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  createdAt      DateTime          @default(now())
+  participants   RoomParticipant[]
+  messages       Message[]
+  document       CodeDocument?
+  submissions    Submission[]
+  report         InterviewReport?
+  comments       CodeComment[]
+  snapshots      CodeSnapshot[]
+
+  @@index([hostId])
+}
+
+model RoomParticipant {
+  roomId   String
+  userId   String
+  role     String   @default("PARTICIPANT") // HOST, INTERVIEWER, CANDIDATE, PARTICIPANT
+  joinedAt DateTime @default(now())
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  roomId        String
+  userId        String
+  recipientId   String?  // If direct/private message
+  body          String
+  reactions     String?  // JSON string of reactions { "👍": ["userId1", "userId2"] }
+  isCodeSnippet Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model CodeDocument {
+  roomId    String   @id
+  state     Bytes
+  updatedAt DateTime @updatedAt
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  roomId      String
+  userId      String
+  language    String
+  code        String
+  stdout      String
+  stderr      String
+  timeMs      Int
+  passedCases Int      @default(0)
+  totalCases  Int      @default(0)
+  status      String   @default("SUCCESS") // SUCCESS, ERROR, WRONG_ANSWER
+  createdAt   DateTime @default(now())
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model InterviewReport {
+  id            String   @id @default(cuid())
+  roomId        String   @unique
+  candidateId   String
+  interviewerId String
+  candidateName String
+  rating        Int      @default(3) // 1 to 5
+  feedback      String
+  strengths     String
+  improvements  String
+  decision      String   @default("PENDING") // PENDING, HIRE, STRONG_HIRE, NO_HIRE
+  isReleased    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model CodeComment {
+  id         String   @id @default(cuid())
+  roomId     String
+  userId     String
+  userName   String
+  lineNumber Int
+  comment    String
+  status     String   @default("OPEN") // OPEN, RESOLVED
+  createdAt  DateTime @default(now())
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, lineNumber])
+}
+
+model CodeSnapshot {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  userName  String
+  code      String
+  label     String?
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model Contest {
+  id              String              @id @default(cuid())
+  title           String
+  description     String
+  isPublic        Boolean             @default(true)
+  startTime       DateTime            @default(now())
+  durationMinutes Int                 @default(60)
+  problemId       String
+  creatorId       String
+  creatorName     String
+  createdAt       DateTime            @default(now())
+  submissions     ContestSubmission[]
+}
+
+model ContestSubmission {
+  id          String   @id @default(cuid())
+  contestId   String
+  userId      String
+  userName    String
+  language    String
+  code        String
+  score       Int      @default(0)
+  passedCases Int      @default(0)
+  totalCases  Int      @default(0)
+  timeMs      Int      @default(0)
+  createdAt   DateTime @default(now())
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([contestId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // INVITE, MESSAGE, INTERVIEW, CONTEST, SYSTEM
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
