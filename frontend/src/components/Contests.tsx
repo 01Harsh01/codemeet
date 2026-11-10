@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ContestItem, ContestSubmissionItem } from '../types';
 import { PROBLEMS } from '../problems';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface ContestsProps {
   onJoinContest: (contest: ContestItem) => void;
@@ -17,7 +18,7 @@ export function Contests({ onJoinContest }: ContestsProps) {
 
   const loadContests = () => {
     setLoading(true);
-    fetch('/api/v1/contests', {
+    fetch(`${API_BASE}/contests`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())
@@ -36,7 +37,7 @@ export function Contests({ onJoinContest }: ContestsProps) {
     if (!title.trim()) return;
     sound.playPop();
     try {
-      const res = await fetch('/api/v1/contests', {
+      const res = await fetch(`${API_BASE}/contests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +156,7 @@ export function ContestArena({ contest, onClose }: { contest: ContestItem; onClo
   const problem = PROBLEMS.find((p) => p.id === contest.problemId) || PROBLEMS[0];
 
   useEffect(() => {
-    fetch(`/api/v1/contests/${contest.id}`, {
+    fetch(`${API_BASE}/contests/${contest.id}`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())

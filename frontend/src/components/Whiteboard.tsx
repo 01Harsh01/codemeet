@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface WhiteboardProps {
   roomId: string;
@@ -33,7 +34,7 @@ export function Whiteboard({ roomId, socket, onClose }: WhiteboardProps) {
 
   // Load saved whiteboard data on mount
   useEffect(() => {
-    fetch(`/api/v1/rooms/${roomId}/whiteboard`, {
+    fetch(`${API_BASE}/rooms/${roomId}/whiteboard`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())
@@ -139,7 +140,7 @@ export function Whiteboard({ roomId, socket, onClose }: WhiteboardProps) {
   }, [elements, currentElem]);
 
   const saveToBackend = (newElems: DrawElement[]) => {
-    fetch(`/api/v1/rooms/${roomId}/whiteboard`, {
+    fetch(`${API_BASE}/rooms/${roomId}/whiteboard`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

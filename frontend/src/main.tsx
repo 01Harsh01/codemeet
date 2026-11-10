@@ -20,6 +20,7 @@ import { SessionReplay } from './components/SessionReplay';
 import { InterviewReportModal } from './components/InterviewReportModal';
 import { InviteModal } from './components/InviteModal';
 import { ContestItem, NotificationItem } from './types';
+import { API_BASE, BACKEND_URL, getWsUrl } from './config';
 import './styles.css';
 
 const tok = () => localStorage.getItem('token') || '';
@@ -29,7 +30,7 @@ const currentUser = () => ({
 });
 
 async function api(path: string, method = 'GET', body?: unknown) {
-  const r = await fetch('/api/v1' + path, {
+  const r = await fetch(API_BASE + path, {
     method,
     headers: {
       'content-type': 'application/json',
@@ -912,7 +913,7 @@ function Room() {
       })
       .catch((e) => setErr(e.message));
 
-    const s = io({ auth: { token: tok() } });
+    const s = io(BACKEND_URL || undefined, { auth: { token: tok() } });
     sock.current = s;
 
     s.emit('room:join', id);
@@ -1034,8 +1035,7 @@ function Room() {
     });
 
     const doc = new Y.Doc();
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const provider = new WebsocketProvider(`${proto}://${location.host}/yjs`, id, doc, {
+    const provider = new WebsocketProvider(getWsUrl('/yjs'), id, doc, {
       params: { token: tok() },
     });
 

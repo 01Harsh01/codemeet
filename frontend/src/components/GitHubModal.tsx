@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface GitHubModalProps {
   getCurrentCode: () => string;
@@ -21,7 +22,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
 
   useEffect(() => {
     // Check if user already connected
-    fetch('/api/v1/auth/me', {
+    fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())
@@ -39,7 +40,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
     setLoading(true);
     sound.playPop();
     try {
-      const res = await fetch('/api/v1/github/token', {
+      const res = await fetch(`${API_BASE}/github/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
   const loadRepos = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/github/repos', {
+      const res = await fetch(`${API_BASE}/github/repos`, {
         headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
       });
       const data = await res.json();
@@ -78,7 +79,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
     setLoading(true);
     sound.playPop();
     try {
-      const res = await fetch(`/api/v1/github/contents?owner=${repo.owner.login}&repo=${repo.name}&path=${path}`, {
+      const res = await fetch(`${API_BASE}/github/contents?owner=${repo.owner.login}&repo=${repo.name}&path=${path}`, {
         headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
       });
       const data = await res.json();
@@ -92,7 +93,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
     sound.playPop();
     try {
       const res = await fetch(
-        `/api/v1/github/file?owner=${selectedRepo.owner.login}&repo=${selectedRepo.name}&path=${file.path}`,
+        `${API_BASE}/github/file?owner=${selectedRepo.owner.login}&repo=${selectedRepo.name}&path=${file.path}`,
         {
           headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
         }
@@ -120,7 +121,7 @@ export function GitHubModal({ getCurrentCode, onLoadCode, onClose }: GitHubModal
     setLoading(true);
     sound.playPop();
     try {
-      const res = await fetch('/api/v1/github/commit', {
+      const res = await fetch(`${API_BASE}/github/commit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

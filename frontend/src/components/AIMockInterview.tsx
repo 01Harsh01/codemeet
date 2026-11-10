@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface AIMockInterviewProps {
   getCode: () => string;
@@ -52,7 +53,7 @@ export function AIMockInterview({ getCode, onClose }: AIMockInterviewProps) {
         }
       } catch {}
 
-      const res = await fetch('/api/v1/ai/mock-interview', {
+      const res = await fetch(`${API_BASE}/ai/mock-interview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export function AIMockInterview({ getCode, onClose }: AIMockInterviewProps) {
         }
       } catch {}
 
-      const res = await fetch('/api/v1/ai/mock-interview', {
+      const res = await fetch(`${API_BASE}/ai/mock-interview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

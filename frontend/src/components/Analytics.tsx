@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE } from '../config';
 
 interface WeeklyItem {
   day: string;
@@ -39,7 +40,7 @@ export function Analytics() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('/api/v1/analytics', {
+    fetch(`${API_BASE}/analytics`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())

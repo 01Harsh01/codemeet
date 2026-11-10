@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { InterviewReport } from '../types';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface InterviewReportModalProps {
   roomId: string;
@@ -21,7 +22,7 @@ export function InterviewReportModal({ roomId, isHost, onClose }: InterviewRepor
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch(`/api/v1/rooms/${roomId}/report`, {
+    fetch(`${API_BASE}/rooms/${roomId}/report`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => (r.ok ? r.json() : null))
@@ -44,7 +45,7 @@ export function InterviewReportModal({ roomId, isHost, onClose }: InterviewRepor
     setLoading(true);
     sound.playPop();
     try {
-      const res = await fetch(`/api/v1/rooms/${roomId}/report`, {
+      const res = await fetch(`${API_BASE}/rooms/${roomId}/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export function InterviewReportModal({ roomId, isHost, onClose }: InterviewRepor
   const releaseReport = async () => {
     sound.playPop();
     try {
-      const res = await fetch(`/api/v1/rooms/${roomId}/report/release`, {
+      const res = await fetch(`${API_BASE}/rooms/${roomId}/report/release`, {
         method: 'PATCH',
         headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
       });

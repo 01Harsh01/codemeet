@@ -47,6 +47,21 @@ app.use(
 
 app.use('/api', rateLimit({ windowMs: 60_000, limit: 1000 }));
 app.get('/health', (_, r) => r.json({ ok: true, timestamp: new Date().toISOString() }));
+app.get('/', (_, r) =>
+  r.json({
+    ok: true,
+    service: 'CodeMeet Real-Time Backend API',
+    status: 'ONLINE',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/v1/auth',
+      rooms: '/api/v1/rooms',
+      ai: '/api/v1/ai',
+    },
+    docs: 'https://github.com/01Harsh01/codemeet',
+  })
+);
 
 type Auth = Request & { uid: string };
 const sign = (uid: string) => jwt.sign({ uid }, JWT, { expiresIn: '7d' });

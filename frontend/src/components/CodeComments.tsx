@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CodeCommentItem } from '../types';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface CodeCommentsProps {
   roomId: string;
@@ -16,7 +17,7 @@ export function CodeComments({ roomId, socket, onClose }: CodeCommentsProps) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const loadComments = () => {
-    fetch(`/api/v1/rooms/${roomId}/comments`, {
+    fetch(`${API_BASE}/rooms/${roomId}/comments`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())
@@ -51,7 +52,7 @@ export function CodeComments({ roomId, socket, onClose }: CodeCommentsProps) {
     setLoading(true);
     sound.playPop();
     try {
-      const res = await fetch(`/api/v1/rooms/${roomId}/comments`, {
+      const res = await fetch(`${API_BASE}/rooms/${roomId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +77,7 @@ export function CodeComments({ roomId, socket, onClose }: CodeCommentsProps) {
 
   const resolveComment = async (id: string) => {
     try {
-      await fetch(`/api/v1/rooms/${roomId}/comments/${id}/resolve`, {
+      await fetch(`${API_BASE}/rooms/${roomId}/comments/${id}/resolve`, {
         method: 'PATCH',
         headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
       });

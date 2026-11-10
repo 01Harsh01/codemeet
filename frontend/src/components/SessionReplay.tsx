@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CodeSnapshotItem } from '../types';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface SessionReplayProps {
   roomId: string;
@@ -14,7 +15,7 @@ export function SessionReplay({ roomId, onRestoreCode, onClose }: SessionReplayP
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch(`/api/v1/rooms/${roomId}/snapshots`, {
+    fetch(`${API_BASE}/rooms/${roomId}/snapshots`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => r.json())
@@ -32,7 +33,7 @@ export function SessionReplay({ roomId, onRestoreCode, onClose }: SessionReplayP
 
   const exportSummary = async () => {
     try {
-      const res = await fetch(`/api/v1/rooms/${roomId}/export-summary`, {
+      const res = await fetch(`${API_BASE}/rooms/${roomId}/export-summary`, {
         headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
       });
       const data = await res.json();

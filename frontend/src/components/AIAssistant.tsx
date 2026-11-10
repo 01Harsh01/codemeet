@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sound } from '../sound';
+import { API_BASE } from '../config';
 
 interface Message {
   id: string;
@@ -77,7 +78,7 @@ export function AIAssistant({ language, getCode, onInsertCode, lastErrorOutput, 
 
   // Check server environment on mount
   useEffect(() => {
-    fetch('/api/v1/ai/config', {
+    fetch(`${API_BASE}/ai/config`, {
       headers: { Authorization: 'Bearer ' + (localStorage.getItem('token') || '') },
     })
       .then((r) => (r.ok ? r.json() : {}))
@@ -125,7 +126,7 @@ export function AIAssistant({ language, getCode, onInsertCode, lastErrorOutput, 
   const handleTestConnection = async () => {
     setTestStatus({ loading: true });
     try {
-      const res = await fetch('/api/v1/ai/test-connection', {
+      const res = await fetch(`${API_BASE}/ai/test-connection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +223,7 @@ export function AIAssistant({ language, getCode, onInsertCode, lastErrorOutput, 
     if (action === 'custom') setInputPrompt('');
 
     try {
-      const res = await fetch('/api/v1/ai/assist', {
+      const res = await fetch(`${API_BASE}/ai/assist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
