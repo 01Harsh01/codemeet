@@ -1,0 +1,43 @@
+name: CodeMeet CI/CD & Auto-Deploy Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package.json
+            frontend/package.json
+
+      - name: Verify & Build Backend
+        run: |
+          cd backend
+          npm install
+          node prepare-db.js
+          npx prisma generate
+          npm run build
+
+      - name: Verify & Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+        env:
+          VITE_API_URL: https://codemeet-2rqu.onrender.com
+
+      - name: Deployment Ready
+        run: echo "CodeMeet builds passed! Automatic deployment triggered on Render and Vercel."
