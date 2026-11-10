@@ -18,3 +18,4 @@ if (fs.existsSync(schemaPath)) {
 
   fs.writeFileSync(schemaPath, content);
 }
+
